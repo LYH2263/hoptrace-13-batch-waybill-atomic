@@ -35,6 +35,7 @@ watch(selected, (id) => {
 
 const hops = computed(() => detail.value?.hops || [])
 const proof = computed(() => detail.value?.proof)
+const loadBatches = computed(() => detail.value?.load_batches || [])
 </script>
 
 <template>
@@ -93,6 +94,19 @@ const proof = computed(() => detail.value?.proof)
           <dt>写入</dt><dd>{{ proof.created_at }}</dd>
         </dl>
         <p v-else class="muted">暂无证明</p>
+        <h2>装载批次</h2>
+        <dl class="kv" v-for="b in loadBatches" :key="b.batch_id">
+          <dt>批次</dt>
+          <dd>
+            {{ b.batch_id }}
+            <span class="badge" :class="b.outcome === 'success' ? 'ok' : 'bad'">
+              {{ b.outcome === 'success' ? '成功' : '失败' }}
+            </span>
+          </dd>
+          <dt>本单写入</dt><dd>{{ b.written_points }}/{{ b.planned_points }} 点</dd>
+          <dt>时间</dt><dd>{{ b.created_at }}</dd>
+        </dl>
+        <p v-if="!loadBatches.length" class="muted">未参与原子批次</p>
       </aside>
 
       <footer class="pane dot-rail">

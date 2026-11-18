@@ -1,6 +1,5 @@
-# 空桩：batch_waybill_atomic — 功能题实现入口，基座不包含业务逻辑。
-STUB = True
+# batch_waybill_atomic — 整批运单级原子装载。
+# 批次边界形态：批次成员表（store.py）；提交路径：单数据库事务（service.py）。
+from app.modules.batch_waybill_atomic import service, store
 
-
-def not_implemented():
-    raise NotImplementedError("batch_waybill_atomic stub")
+__all__ = ["service", "store"]

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 
 from app.db import connect
+from app.modules.batch_waybill_atomic import store as batch_store
 from app.services import ingest as ingest_svc
 from app.services import timeline as timeline_svc
 
@@ -53,6 +54,7 @@ def waybill_timeline(waybill_id: str):
             "waybill": dict(wb),
             "hops": hops,
             "proof": dict(proof) if proof else None,
+            "load_batches": batch_store.batches_for_waybill(conn, waybill_id),
         }
     finally:
         conn.close()

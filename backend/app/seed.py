@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS hops (
   seq INTEGER,
   channel TEXT NOT NULL DEFAULT 'primary',
   retracted INTEGER NOT NULL DEFAULT 0,
+  batch_id TEXT,
   UNIQUE(waybill_id, event_ts, location_code, event_code)
 );
 
@@ -47,6 +48,27 @@ CREATE TABLE IF NOT EXISTS status_proofs (
   proj_value TEXT NOT NULL,
   created_at TEXT NOT NULL
 );
+
+-- batch_waybill_atomic：批次边界落库形态择一 = 批次成员表。
+-- load_batches 记整批成败；load_batch_members 记运单集合与每单计划/写入点数，
+-- 禁止只记总成功数。
+CREATE TABLE IF NOT EXISTS load_batches (
+  id TEXT PRIMARY KEY,
+  cutoff_ts TEXT,
+  outcome TEXT NOT NULL,
+  error TEXT,
+  member_count INTEGER NOT NULL DEFAULT 0,
+  written_total INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS load_batch_members (
+  batch_id TEXT NOT NULL REFERENCES load_batches(id),
+  waybill_id TEXT NOT NULL,
+  planned_points INTEGER NOT NULL DEFAULT 0,
+  written_points INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (batch_id, waybill_id)
+);
 """
 
 EVENT_STATUS = {
@@ -62,11 +84,19 @@ EVENT_STATUS = {
 def init_db():
     conn = connect()
     conn.executescript(SCHEMA)
+    _migrate(conn)
     n = conn.execute("SELECT COUNT(*) AS c FROM waybills").fetchone()["c"]
     if n == 0:
         _seed_fixtures(conn)
     conn.commit()
     conn.close()
+
+
+def _migrate(conn):
+    """老库补列：hops.batch_id（正式线上的点回溯到来源批次）。"""
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(hops)")}
+    if "batch_id" not in cols:
+        conn.execute("ALTER TABLE hops ADD COLUMN batch_id TEXT")
 
 
 def _seed_fixtures(conn):

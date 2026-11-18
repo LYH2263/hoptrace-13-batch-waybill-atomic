@@ -1,0 +1,34 @@
+{
+  "batch_id": "B-ATOMIC-01",
+  "cutoff_ts": "2026-11-18T09:30:00Z",
+  "hops": [
+    {
+      "id": "H-A1",
+      "waybill_id": "WB-1001",
+      "waybill_title": "华东干线样件",
+      "event_ts": "2026-11-18T08:10:00Z",
+      "location_code": "HZ-STATION",
+      "event_code": "OUT_FOR_DELIVERY",
+      "seq": 4
+    },
+    {
+      "id": "H-A2",
+      "waybill_id": "WB-1001",
+      "waybill_title": "华东干线样件",
+      "event_ts": "2026-11-18T08:40:00Z",
+      "location_code": "HZ-STATION",
+      "event_code": "DELIVERED",
+      "seq": 5
+    },
+    {
+      "id": "H-A3",
+      "waybill_id": "WB-1002",
+      "waybill_title": "同城急送样件",
+      "event_ts": null,
+      "location_code": "SH-LOCAL",
+      "event_code": "OUT_FOR_DELIVERY",
+      "seq": 2,
+      "fail_note": "第二单故意失败：event_ts 缺失，正式写入触发 NOT NULL 约束，整批回滚"
+    }
+  ]
+}
